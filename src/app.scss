@@ -1,0 +1,48 @@
+#app {
+  width: 1000px;
+  margin: 0 auto;
+}
+
+.panel__heading {
+  display: flex;
+  align-items: center;
+  background: #e5e5ea;
+  border: 1px solid #dbdbe0;
+  border-radius: 10px;
+  padding: 23px 20px;
+  margin-bottom: 15px;
+}
+
+.mr-8 {
+  margin-right: 8px;
+}
+
+h3 {
+  font-size: 13px;
+  line-height: 15px;
+  color: #2a2a2f;
+}
+
+h3:nth-child(1) {
+  flex: 1;
+}
+
+h3:nth-child(2) {
+  flex: 3;
+}
+
+h3:nth-child(3) {
+  flex: 1;
+}
+
+.todo__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.todo__action {
+  button:first-child {
+    margin-right: 8px;
+  }
+}

@@ -1,0 +1,30 @@
+.btn {
+  border: none;
+  cursor: pointer;
+  outline: none;
+  border-radius: 5px;
+  text-align: center;
+  color: #ffffff;
+}
+.btn--large{
+  padding: 14px 47px;
+  font-size: 15px;
+  line-height: 18px;
+}
+.btn--medium {
+  padding: 7px;
+  font-size: 13px;
+  line-height: 15px;
+}
+.btn--primary {
+  background-color: #475be2;
+}
+
+.btn--secondary{
+  color: #a053ec;
+  background: rgba(160, 83, 236, 0.2);
+}
+.btn--third {
+  color: #f16f6f;
+  background: rgba(241, 111, 111, 0.2);
+}
