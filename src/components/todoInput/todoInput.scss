@@ -1,11 +1,50 @@
-.todo__input {
+.input-wrap {
   width: 100%;
   padding: 15px 14px;
-  color: #505058;
   border: 1px solid #b1b1b7;
   border-radius: 5px;
   margin-right: 20px;
+  display: flex;
+  align-items: center;
+
+  span {
+    position: relative;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: bold;
+    display: inline-block;
+    line-height: 15px;
+    visibility: hidden;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: -1;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      width: 15px;
+      height: 15px;
+      background: #2a28a7;
+    }
+  }
 }
+
+.todo__input {
+  width: 100%;
+  // padding: 15px 14px;
+  color: #505058;
+  // border: 1px solid #b1b1b7;
+  // border-radius: 5px;
+  // margin-right: 20px;
+  border: none;
+  background: none;
+  outline: none;
+  padding: 0;
+  margin: 0;
+}
+
 .todo__input:focus {
   outline: none;
 }

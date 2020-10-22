@@ -5,33 +5,32 @@ class TodoList {
    *
    * @param {{
    *  items: Array,
-   *  isEdit: boolean,
-   *  value: string,
-   *  id: '',
-   *  createAt: '',
-   *  updateAt: '',
-   *  isComplete: boolean
    * }} options
    */
   constructor(options = {}) {
     const defaultOptions = {
       items: [],
-      isEdit: false,
-      value: "",
-      id: "",
-      isComplete: false,
-      createAt: "",
-      updateAt: "",
     };
     this.inputEl = document.querySelector(".todo__input");
     this.btnAddEl = document.querySelector(".btn__submit");
     this.todoListEl = document.querySelector(".todo__list");
+    this.btnClearInput = document.querySelector(".btn__clearInput");
+    this.panel = document.querySelector(".panel");
     this.options = { ...defaultOptions, ...options };
+    this.items = [];
+    this.isEdit = false;
+    this.isComplete = false;
+    this.createAt = "";
+    this.updateAt = "";
+    this.id = "";
     this._init();
   }
+  _renderPanel() {
+    console.log(this.items.length);
+    this.panel.style.visibility = this.items.length > 0 ? "visible" : "hidden";
+  }
   _renderTodoList() {
-    const { items } = this.options;
-    let content = items.map((item) => {
+    let content = this.items.map((item) => {
       return `
         ${todoItem(item)}
       `;
@@ -40,29 +39,44 @@ class TodoList {
   }
   // handleChangeValue
   getValueInput = () => {
-    this.options.value = this.inputEl.value;
+    this.value = this.inputEl.value;
   };
   //handleSubmit
   handleSubmit = (e) => {
     e.preventDefault();
-    this.btnAddEl.textContent = "Add";
+    console.log(this.isEdit);
     const currentTime = new Date();
+    this.btnAddEl.textContent = "Add";
     this.getValueInput();
-    const { isEdit, items, value } = this.options;
-    this.options.createAt = currentTime;
-    isEdit === false ? (this.options.id = uuidv4()) : this.options.id;
-    isEdit === true ? (this.options.updateAt = currentTime) : "";
-    const newTask = {
-      id: this.options.id,
-      name: value,
-      isComplete: this.options.isComplete,
-      createAt: this.options.createAt,
-      updateAt: this.options.updateAt,
-    };
-    items.push(newTask);
-    this.inputEl.value = "";
+    if (this.isEdit) {
+      this.updateAt = currentTime;
+      const editTask = {
+        id: this.id,
+        name: this.value,
+        isComplete: this.isComplete,
+        createAt: this.createAt,
+        updateAt: this.updateAt,
+      };
+      const index = this.items.findIndex((item) => item.id === this.id);
+      this.items[index] = editTask;
+      this.isEdit = false;
+      this.handleClearInput();
+    } else {
+      this.createAt = currentTime;
+      const newTask = {
+        id: uuidv4(),
+        name: this.value,
+        isComplete: this.isComplete,
+        createAt: this.createAt,
+        updateAt: this.updateAt,
+      };
+      this.items.push(newTask);
+      this.isEdit = false;
+      this.handleClearInput();
+      this._renderPanel();
+    }
+
     this._update();
-    console.log(items);
   };
   //handleDelete
   /**
@@ -72,12 +86,14 @@ class TodoList {
    }} id
    */
   handleDelete = (id) => {
-    const { items } = this.options;
-    const filterItems = items.filter((item) => {
-      return item.id !== id;
-    });
-    this.options.items = filterItems;
-    this._update();
+    if (confirm("are you sure")) {
+      const filterItems = this.items.filter((item) => {
+        return item.id !== id;
+      });
+      this.items = filterItems;
+      this._update();
+      this._renderPanel();
+    }
   };
   // handle Edit
   /**
@@ -88,20 +104,15 @@ class TodoList {
    * }} id
    */
   handleEdit = (id) => {
-    this.options.isEdit = true;
+    this.displayBtnClearInput();
     this.btnAddEl.textContent = "Update";
-    const { items } = this.options;
-    const filterItems = items.filter((item) => {
-      return item.id !== id;
-    });
-    this.options.items = filterItems;
-    this._update();
-    const selectedItem = items.find((item) => {
+    const selectedItem = this.items.find((item) => {
       return item.id === id;
     });
+    this.isEdit = true;
+    this.id = id;
     this.inputEl.value = selectedItem.name;
-    this.options.id = id;
-    console.log(items);
+    this.inputEl.focus();
   };
   /**
    *
@@ -114,7 +125,7 @@ class TodoList {
    * }} id
    */
   handleSelect = (currentNode, id) => {
-    const selectedItem = this.options.items.find((item) => {
+    const selectedItem = this.items.find((item) => {
       return item.id === id;
     });
     selectedItem.isComplete = !selectedItem.isComplete;
@@ -125,6 +136,15 @@ class TodoList {
     }
     this._update();
   };
+  displayBtnClearInput() {
+    this.btnClearInput.style.visibility = this.inputEl.value
+      ? "visible"
+      : "hidden";
+  }
+  handleClearInput() {
+    this.inputEl.value = "";
+    this.btnClearInput.style.visibility = "hidden";
+  }
   _update() {
     this._renderTodoList();
   }
@@ -156,6 +176,14 @@ class TodoList {
         );
       }
     });
+    this.inputEl.addEventListener(
+      "keyup",
+      this.displayBtnClearInput.bind(this)
+    );
+    this.btnClearInput.addEventListener(
+      "click",
+      this.handleClearInput.bind(this)
+    );
   }
 }
 export default TodoList;

@@ -236,7 +236,7 @@ exports.default = void 0;
 require("./todoInput.scss");
 
 var todoInput = function todoInput() {
-  return "\n    <input type=\"text\" class=\"todo__input\" />\n  ";
+  return "\n  <div class=\"input-wrap\">\n    <input type=\"text\" class=\"todo__input\" />\n    <span class=\"btn__clearInput\" title=\"Clear\">&times;</span>\n  </div>\n  ";
 };
 
 var _default = todoInput;
@@ -1203,12 +1203,6 @@ var TodoList = /*#__PURE__*/function () {
    *
    * @param {{
    *  items: Array,
-   *  isEdit: boolean,
-   *  value: string,
-   *  id: '',
-   *  createAt: '',
-   *  updateAt: '',
-   *  isComplete: boolean
    * }} options
    */
   function TodoList() {
@@ -1219,69 +1213,89 @@ var TodoList = /*#__PURE__*/function () {
     _classCallCheck(this, TodoList);
 
     _defineProperty(this, "getValueInput", function () {
-      _this.options.value = _this.inputEl.value;
+      _this.value = _this.inputEl.value;
     });
 
     _defineProperty(this, "handleSubmit", function (e) {
       e.preventDefault();
-      _this.btnAddEl.textContent = "Add";
+      console.log(_this.isEdit);
       var currentTime = new Date();
+      _this.btnAddEl.textContent = "Add";
 
       _this.getValueInput();
 
-      var _this$options = _this.options,
-          isEdit = _this$options.isEdit,
-          items = _this$options.items,
-          value = _this$options.value;
-      _this.options.createAt = currentTime;
-      isEdit === false ? _this.options.id = (0, _uuid.v4)() : _this.options.id;
-      isEdit === true ? _this.options.updateAt = currentTime : "";
-      var newTask = {
-        id: _this.options.id,
-        name: value,
-        isComplete: _this.options.isComplete,
-        createAt: _this.options.createAt,
-        updateAt: _this.options.updateAt
-      };
-      items.push(newTask);
-      _this.inputEl.value = "";
+      if (_this.isEdit) {
+        _this.updateAt = currentTime;
+        var editTask = {
+          id: _this.id,
+          name: _this.value,
+          isComplete: _this.isComplete,
+          createAt: _this.createAt,
+          updateAt: _this.updateAt
+        };
+
+        var index = _this.items.findIndex(function (item) {
+          return item.id === _this.id;
+        });
+
+        _this.items[index] = editTask;
+        _this.isEdit = false;
+
+        _this.handleClearInput();
+      } else {
+        _this.createAt = currentTime;
+        var newTask = {
+          id: (0, _uuid.v4)(),
+          name: _this.value,
+          isComplete: _this.isComplete,
+          createAt: _this.createAt,
+          updateAt: _this.updateAt
+        };
+
+        _this.items.push(newTask);
+
+        _this.isEdit = false;
+
+        _this.handleClearInput();
+
+        _this._renderPanel();
+      }
 
       _this._update();
-
-      console.log(items);
     });
 
     _defineProperty(this, "handleDelete", function (id) {
-      var items = _this.options.items;
-      var filterItems = items.filter(function (item) {
-        return item.id !== id;
-      });
-      _this.options.items = filterItems;
+      if (confirm("are you sure")) {
+        var filterItems = _this.items.filter(function (item) {
+          return item.id !== id;
+        });
 
-      _this._update();
+        _this.items = filterItems;
+
+        _this._update();
+
+        _this._renderPanel();
+      }
     });
 
     _defineProperty(this, "handleEdit", function (id) {
-      _this.options.isEdit = true;
+      _this.displayBtnClearInput();
+
       _this.btnAddEl.textContent = "Update";
-      var items = _this.options.items;
-      var filterItems = items.filter(function (item) {
-        return item.id !== id;
-      });
-      _this.options.items = filterItems;
 
-      _this._update();
-
-      var selectedItem = items.find(function (item) {
+      var selectedItem = _this.items.find(function (item) {
         return item.id === id;
       });
+
+      _this.isEdit = true;
+      _this.id = id;
       _this.inputEl.value = selectedItem.name;
-      _this.options.id = id;
-      console.log(items);
+
+      _this.inputEl.focus();
     });
 
     _defineProperty(this, "handleSelect", function (currentNode, id) {
-      var selectedItem = _this.options.items.find(function (item) {
+      var selectedItem = _this.items.find(function (item) {
         return item.id === id;
       });
 
@@ -1297,32 +1311,50 @@ var TodoList = /*#__PURE__*/function () {
     });
 
     var defaultOptions = {
-      items: [],
-      isEdit: false,
-      value: "",
-      id: "",
-      isComplete: false,
-      createAt: "",
-      updateAt: ""
+      items: []
     };
     this.inputEl = document.querySelector(".todo__input");
     this.btnAddEl = document.querySelector(".btn__submit");
     this.todoListEl = document.querySelector(".todo__list");
+    this.btnClearInput = document.querySelector(".btn__clearInput");
+    this.panel = document.querySelector(".panel");
     this.options = _objectSpread(_objectSpread({}, defaultOptions), options);
+    this.items = [];
+    this.isEdit = false;
+    this.isComplete = false;
+    this.createAt = "";
+    this.updateAt = "";
+    this.id = "";
 
     this._init();
   }
 
   _createClass(TodoList, [{
+    key: "_renderPanel",
+    value: function _renderPanel() {
+      console.log(this.items.length);
+      this.panel.style.visibility = this.items.length > 0 ? "visible" : "hidden";
+    }
+  }, {
     key: "_renderTodoList",
     value: function _renderTodoList() {
-      var items = this.options.items;
-      var content = items.map(function (item) {
+      var content = this.items.map(function (item) {
         return "\n        ".concat((0, _todoItem.default)(item), "\n      ");
       });
       this.todoListEl.innerHTML = content.join("");
     } // handleChangeValue
 
+  }, {
+    key: "displayBtnClearInput",
+    value: function displayBtnClearInput() {
+      this.btnClearInput.style.visibility = this.inputEl.value ? "visible" : "hidden";
+    }
+  }, {
+    key: "handleClearInput",
+    value: function handleClearInput() {
+      this.inputEl.value = "";
+      this.btnClearInput.style.visibility = "hidden";
+    }
   }, {
     key: "_update",
     value: function _update() {
@@ -1360,6 +1392,8 @@ var TodoList = /*#__PURE__*/function () {
           currentNode.addEventListener("click", _this2.handleSelect(currentNode, dataId));
         }
       });
+      this.inputEl.addEventListener("keyup", this.displayBtnClearInput.bind(this));
+      this.btnClearInput.addEventListener("click", this.handleClearInput.bind(this));
     }
   }]);
 
@@ -1423,7 +1457,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "38023" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "45461" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
